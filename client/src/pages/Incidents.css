@@ -1,0 +1,16 @@
+.row-critical {
+  background: #fff5f5;
+  animation: pulse-row 2s infinite;
+}
+
+@keyframes pulse-row {
+  0% { background: #fff5f5; }
+  50% { background: #fee2e2; }
+  100% { background: #fff5f5; }
+}
+
+.description-cell {
+  max-width: 300px;
+  font-size: 13px;
+  color: #555;
+}

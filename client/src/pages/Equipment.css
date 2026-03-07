@@ -1,0 +1,41 @@
+.eol-alert-banner {
+  background: #fff7ed;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.eol-alert-banner h3 {
+  color: #92400e;
+  margin-bottom: 10px;
+}
+
+.eol-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.eol-item {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.badge-yellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.modal-large {
+  max-width: 700px !important;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
