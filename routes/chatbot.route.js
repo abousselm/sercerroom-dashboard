@@ -5,6 +5,24 @@ const Site = require('../models/Site');
 const Room = require('../models/Room');
 const User = require('../models/User');
 
+// ─── MOTS DANGEREUX ──────────────────────────────────────────────────────────
+const MOTS_DANGEREUX = [
+  'hack', 'hacker', 'hacking', 'pirate', 'pirater', 'exploit', 'malware',
+  'virus', 'ransomware', 'phishing', 'ddos', 'injection', 'sql injection',
+  'xss', 'backdoor', 'trojan', 'keylogger', 'rootkit', 'spyware',
+  'tuer', 'kill', 'bombe', 'bomb', 'explosion', 'attaque', 'attack',
+  'arme', 'weapon', 'terrorisme', 'terrorist',
+  'idiot', 'imbecile', 'connard', 'salaud', 'merde', 'putain',
+];
+
+const contientMotDangereux = (message) => {
+  const texte = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return MOTS_DANGEREUX.find(mot =>
+    texte.includes(mot.normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+  );
+};
+
+// ─── CONTEXTE UTILISATEUR ────────────────────────────────────────────────────
 const getUserContext = async (userId, userRole) => {
   try {
     if (userRole === 'admin') {
@@ -39,9 +57,20 @@ Réponds en français, de façon concise et professionnelle. Utilise ces donnée
   }
 };
 
+// ─── ROUTE PRINCIPALE ────────────────────────────────────────────────────────
 router.post('/message', authMiddleware, async (req, res) => {
   try {
     const { message, history } = req.body;
+
+    // Vérification mots dangereux
+    const motDetecte = contientMotDangereux(message);
+    if (motDetecte) {
+      return res.json({
+        reply: `⚠️ **Message dangereux détecté !**\n\nVotre message contient un contenu inapproprié ("${motDetecte}").\n\nCe comportement a été enregistré. Veuillez utiliser cet assistant uniquement pour des questions professionnelles liées à la gestion des salles serveurs.\n\n🔒 Si vous pensez que c'est une erreur, contactez votre administrateur.`,
+        dangerous: true
+      });
+    }
+
     const systemPrompt = await getUserContext(req.user.id, req.user.role);
 
     const messages = [
