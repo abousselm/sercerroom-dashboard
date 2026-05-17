@@ -19,16 +19,30 @@ const ChatbotWidget = () => {
 
   // Voice recognition setup
   useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SR) {
-      const r = new SR();
-      r.lang = "fr-FR";
-      r.continuous = false;
-      r.interimResults = false;
-      r.onresult = (e) => { setInput(e.results[0][0].transcript); setIsListening(false); };
-      r.onerror = () => setIsListening(false);
-      r.onend = () => setIsListening(false);
-      recognitionRef.current = r;
+    try {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SR) {
+        const r = new SR();
+        r.lang = "fr-FR";
+        r.continuous = false;
+        r.interimResults = false;
+        r.onresult = (e) => {
+          if (e.results[0]) {
+            setInput(e.results[0][0].transcript);
+          }
+          setIsListening(false);
+        };
+        r.onerror = (e) => {
+          console.warn("Erreur reconnaissance vocale:", e.error);
+          setIsListening(false);
+        };
+        r.onend = () => setIsListening(false);
+        recognitionRef.current = r;
+      } else {
+        console.warn("Reconnaissance vocale non supportée par ce navigateur");
+      }
+    } catch (err) {
+      console.error("Erreur initialisation reconnaissance vocale:", err);
     }
   }, []);
 
@@ -107,13 +121,13 @@ const ChatbotWidget = () => {
         .cb-toggle:hover { transform:scale(1.1); }
         .cb-ring { position:absolute; inset:-4px; border-radius:50%; border:2px solid rgba(14,165,233,0.35); animation:cbRing 2s ease-out infinite; }
         @keyframes cbRing { 0%{transform:scale(1);opacity:.7} 100%{transform:scale(1.45);opacity:0} }
-        .cb-panel { position:fixed; bottom:96px; right:28px; width:370px; height:545px; background:#070f1c; border:1px solid rgba(14,165,233,0.16); border-radius:18px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,0.6); z-index:9998; animation:cbIn 0.28s cubic-bezier(0.34,1.56,0.64,1); font-family:'Syne',sans-serif; }
+        .cb-panel { position:fixed; bottom:96px; right:28px; width:370px; height:545px; background:#070f1c; border:1px solid rgba(14,165,233,0.16); border-radius:18px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,0.6); z-index:9998; animation:cbIn 0.28s cubic-bezier(0.34,1.56,0.64,1); font-family:inherit; }
         @keyframes cbIn { from{transform:translateY(14px) scale(0.96);opacity:0} to{transform:translateY(0) scale(1);opacity:1} }
         .cb-head { background:linear-gradient(135deg,#0f172a,#19324f); padding:13px 15px; border-bottom:1px solid rgba(14,165,233,0.13); display:flex; align-items:center; gap:10px; }
         .cb-av { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#0ea5e9,#38bdf8); display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 0 12px rgba(14,165,233,0.4); flex-shrink:0; }
         .cb-hinfo { flex:1; }
         .cb-name { font-size:13px; font-weight:700; color:#e2e8f0; }
-        .cb-status { font-size:10.5px; color:#38bdf8; display:flex; align-items:center; gap:4px; margin-top:2px; font-family:'JetBrains Mono',monospace; }
+        .cb-status { font-size:10.5px; color:#38bdf8; display:flex; align-items:center; gap:4px; margin-top:2px; font-family:inherit; }
         .cb-sdot { width:5px; height:5px; background:#22c55e; border-radius:50%; animation:cbBlink 1.5s ease-in-out infinite; }
         @keyframes cbBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
         .cb-x { background:rgba(255,255,255,0.06); border:none; color:#94a3b8; width:26px; height:26px; border-radius:7px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.18s; }
@@ -134,10 +148,10 @@ const ChatbotWidget = () => {
         @keyframes cbBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
         .cb-qs { padding:8px 13px; display:flex; gap:5px; overflow-x:auto; border-top:1px solid rgba(14,165,233,0.09); scrollbar-width:none; }
         .cb-qs::-webkit-scrollbar { display:none; }
-        .cb-q { background:rgba(14,165,233,0.06); border:1px solid rgba(14,165,233,0.16); color:#7dd3fc; padding:4px 9px; border-radius:14px; font-size:10.5px; cursor:pointer; white-space:nowrap; transition:all 0.15s; font-family:'Syne',sans-serif; }
+        .cb-q { background:rgba(14,165,233,0.06); border:1px solid rgba(14,165,233,0.16); color:#7dd3fc; padding:4px 9px; border-radius:14px; font-size:10.5px; cursor:pointer; white-space:nowrap; transition:all 0.15s; font-family:inherit; }
         .cb-q:hover { background:rgba(14,165,233,0.14); color:#e0f2fe; }
         .cb-foot { padding:9px 13px; border-top:1px solid rgba(14,165,233,0.1); background:rgba(5,12,22,0.9); display:flex; gap:6px; align-items:center; }
-        .cb-inp { flex:1; background:rgba(14,165,233,0.05); border:1px solid rgba(14,165,233,0.16); border-radius:9px; padding:8px 11px; color:#e2e8f0; font-size:12.5px; font-family:'Syne',sans-serif; outline:none; transition:border-color 0.18s; }
+        .cb-inp { flex:1; background:rgba(14,165,233,0.05); border:1px solid rgba(14,165,233,0.16); border-radius:9px; padding:8px 11px; color:#e2e8f0; font-size:12.5px; font-family:inherit; outline:none; transition:border-color 0.18s; }
         .cb-inp:focus { border-color:rgba(14,165,233,0.4); }
         .cb-inp::placeholder { color:#334155; }
         .cb-ibtn { width:34px; height:34px; border-radius:8px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0; font-size:14px; }
@@ -148,7 +162,7 @@ const ChatbotWidget = () => {
         .cb-send { background:linear-gradient(135deg,#0ea5e9,#0284c7); color:white; }
         .cb-send:hover { transform:scale(1.06); }
         .cb-send:disabled { opacity:0.3; cursor:not-allowed; transform:none; }
-        .cb-ai-badge { font-size:10px; background:rgba(14,165,233,0.12); border:1px solid rgba(14,165,233,0.2); color:#38bdf8; padding:2px 7px; border-radius:10px; font-family:'JetBrains Mono',monospace; }
+        .cb-ai-badge { font-size:10px; background:rgba(14,165,233,0.12); border:1px solid rgba(14,165,233,0.2); color:#38bdf8; padding:2px 7px; border-radius:10px; font-family:inherit; }
       `}</style>
 
       <div className="cb-wrap">
@@ -157,7 +171,18 @@ const ChatbotWidget = () => {
           <div className="cb-ring"/>
           {isOpen
             ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            : <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="white"/><circle cx="12" cy="10" r="1" fill="white"/><circle cx="15" cy="10" r="1" fill="white"/></svg>
+            : <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="20" fill="#0ea5e9" opacity="0.15"/>
+                <path d="M16 18h16a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H16a5 5 0 0 1-5-5V23a5 5 0 0 1 5-5Z" fill="#ffffff"/>
+                <rect x="18" y="22" width="4" height="4" rx="2" fill="#0ea5e9"/>
+                <rect x="26" y="22" width="4" height="4" rx="2" fill="#0ea5e9"/>
+                <path d="M18 30c2 2.5 6 2.5 8 0" stroke="#0f172a" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M24 13V9" stroke="#0f172a" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="24" cy="8" r="2" fill="#ffffff"/>
+                <path d="M32 16h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4" fill="#38bdf8"/>
+                <path d="M32 16h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4" stroke="#0f172a" strokeWidth="2" strokeLinejoin="round"/>
+                <text x="34" y="20" fill="#0f172a" fontSize="6" fontWeight="700">HI!</text>
+              </svg>
           }
         </button>
 
@@ -219,11 +244,13 @@ const ChatbotWidget = () => {
                 onKeyDown={e => e.key === 'Enter' && !loading && sendMessage()}
                 disabled={loading}
               />
-              <button
-                className={`cb-ibtn cb-mic ${isListening ? 'on' : ''}`}
-                onClick={toggleVoice}
-                title="Commande vocale"
-              >🎤</button>
+              {recognitionRef.current && (
+                <button
+                  className={`cb-ibtn cb-mic ${isListening ? 'on' : ''}`}
+                  onClick={toggleVoice}
+                  title="Commande vocale"
+                >🎤</button>
+              )}
               <button
                 className="cb-ibtn cb-send"
                 onClick={() => sendMessage()}

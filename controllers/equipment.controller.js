@@ -5,7 +5,19 @@ const Site = require('../models/Site');
 // ✅ Lister tous les équipements
 exports.getAllEquipments = async (req, res) => {
   try {
-    const equipments = await Equipment.find()
+    let query = {};
+
+    // Si l'utilisateur est responsable de site ou technicien, filtrer par son site
+    if (req.user.role === 'responsable_site' || req.user.role === 'technicien') {
+      const user = await require('../models/User').findById(req.user.id).populate('site');
+      if (user && user.site) {
+        query.site = user.site._id;
+      } else {
+        return res.status(403).json({ message: '❌ Aucun site assigné à votre compte' });
+      }
+    }
+
+    const equipments = await Equipment.find(query)
       .populate('room')
       .populate('site')
       .populate('responsible', '-password');

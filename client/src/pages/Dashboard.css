@@ -1,28 +1,59 @@
 .layout {
   display: flex;
   min-height: 100vh;
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-family: inherit;
 }
 
 .main-content {
-  margin-left: 250px;
+  margin-left: 260px;
   flex: 1;
   padding: 30px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-header {
   margin-bottom: 30px;
+  animation: slideInLeft 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .page-header h1 {
-  font-size: 28px;
-  color: #1a1a2e;
-  margin-bottom: 5px;
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #0d1b2a, #4faafe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .page-header p {
-  color: #666;
+  color: #64748b;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .stats-grid {
@@ -39,15 +70,46 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
   border-left: 4px solid;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.6s ease-out backwards;
 }
 
-.stat-card.blue { border-color: #3b82f6; }
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.stat-card.blue { border-color: #4faafe; }
+.stat-card.blue:hover { background: rgba(79, 172, 254, 0.05); }
+
 .stat-card.green { border-color: #10b981; }
+.stat-card.green:hover { background: rgba(16, 185, 129, 0.05); }
+
 .stat-card.purple { border-color: #8b5cf6; }
-.stat-card.orange { border-color: #f59e0b; }
+.stat-card.purple:hover { background: rgba(139, 92, 246, 0.05); }
+
+.stat-card.orange { border-color: #ff6b35; }
+.stat-card.orange:hover { background: rgba(255, 107, 53, 0.05); }
+
 .stat-card.red { border-color: #ef4444; }
+.stat-card.red:hover { background: rgba(239, 68, 68, 0.05); }
 .stat-card.yellow { border-color: #eab308; }
 
 .stat-icon {

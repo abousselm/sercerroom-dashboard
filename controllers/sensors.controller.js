@@ -125,10 +125,22 @@ exports.receiveSensorData = async (req, res) => {
 
 exports.getLatestByRoom = async (req, res) => {
   try {
+    const user = req.user;
     const room = await Room.findById(req.params.roomId);
+
     if (!room) {
       return res.status(404).json({ message: 'Salle introuvable' });
     }
+
+    // Vérifier que l'utilisateur a accès à cette salle
+    if (
+      (user.role === 'responsable_site' || user.role === 'technicien') &&
+      room.site.toString() !== user.site.toString()
+    ) {
+      return res.status(403).json({ message: 'Accès non autorisé à cette salle' });
+    }
+
+
     const latest = await SensorData.findOne({ room: req.params.roomId })
       .sort({ createdAt: -1 });
     res.status(200).json(latest);
@@ -139,6 +151,22 @@ exports.getLatestByRoom = async (req, res) => {
 
 exports.getHistoryByRoom = async (req, res) => {
   try {
+    const user = req.user;
+    const room = await Room.findById(req.params.roomId);
+
+    if (!room) {
+      return res.status(404).json({ message: 'Salle introuvable' });
+    }
+
+    // Vérifier que l'utilisateur a accès à cette salle
+    if (
+      (user.role === 'responsable_site' || user.role === 'technicien') &&
+      room.site.toString() !== user.site.toString()
+    ) {
+      return res.status(403).json({ message: 'Accès non autorisé à cette salle' });
+    }
+
+
     const history = await SensorData.find({ room: req.params.roomId })
       .sort({ createdAt: -1 })
       .limit(50);
@@ -150,7 +178,16 @@ exports.getHistoryByRoom = async (req, res) => {
 
 exports.getAllLatest = async (req, res) => {
   try {
-    const rooms = await Room.find({ isActive: true });
+    const user = req.user;
+
+    let rooms;
+    if (user.role === 'responsable_site' || user.role === 'technicien') {
+      rooms = await Room.find({ isActive: true, site: user.site });
+    } else {
+      rooms = await Room.find({ isActive: true });
+    }
+
+
     const result = await Promise.all(rooms.map(async (room) => {
       const latest = await SensorData.findOne({ room: room._id })
         .sort({ createdAt: -1 });

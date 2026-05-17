@@ -8,7 +8,16 @@
   background: white;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(79, 172, 254, 0.1);
+  animation: fadeIn 0.6s ease-out;
+  font-family: inherit;
+}
+
+.sensor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(79, 172, 254, 0.2);
 }
 
 .sensor-room-header {
@@ -22,7 +31,9 @@
 
 .sensor-room-header h2 {
   font-size: 20px;
-  color: #1a1a2e;
+  color: #0d1b2a;
+  font-weight: 700;
+  font-family: inherit;
 }
 
 .sensor-time {
@@ -31,11 +42,14 @@
 }
 
 .badge-offline {
-  background: #fee2e2;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  font-weight: 500;
+  font-family: inherit;
 }
 
 .sensor-metrics {

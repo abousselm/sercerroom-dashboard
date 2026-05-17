@@ -11,12 +11,13 @@ router.post('/check', accessController.checkAccess);
 router.use(authMiddleware);
 
 // GET /api/access
-router.get('/', roleMiddleware('admin', 'responsable_site'), accessController.getAllLogs);
+router.get('/', roleMiddleware('admin', 'responsable_site', 'technicien'), accessController.getAllLogs);
 
 // GET /api/access/stats
-router.get('/stats', roleMiddleware('admin', 'responsable_site'), accessController.getStats);
+router.get('/stats', roleMiddleware('admin', 'responsable_site', 'technicien'), accessController.getStats);
 
 // GET /api/access/room/:roomId
-router.get('/room/:roomId', roleMiddleware('admin', 'responsable_site'), accessController.getLogsByRoom);
+router.get('/room/:roomId', roleMiddleware('admin', 'responsable_site', 'technicien'), accessController.getLogsByRoom);
+
 
 module.exports = router;

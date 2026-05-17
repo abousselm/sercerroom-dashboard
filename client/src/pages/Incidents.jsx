@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
@@ -7,6 +8,9 @@ import './Incidents.css';
 import socket from '../socket';
 
 const Incidents = () => {
+  const { user } = useAuth();
+  const canManage = user?.role === 'admin' || user?.role === 'responsable_site';
+
   const [incidents, setIncidents] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
@@ -171,7 +175,7 @@ const Incidents = () => {
                   </td>
                   <td>{new Date(inc.createdAt).toLocaleString()}</td>
                   <td>
-                    {!inc.resolved && (
+                    {!inc.resolved && canManage && (
                       <button className="btn-success" onClick={() => handleResolve(inc._id)}>
                         ✅ Résoudre
                       </button>

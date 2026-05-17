@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
@@ -6,6 +7,9 @@ import './Users.css';
 import './Equipment.css';
 
 const Equipment = () => {
+  const { user } = useAuth();
+  const canManage = user?.role === 'admin' || user?.role === 'responsable_site';
+
   const [equipments, setEquipments] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [sites, setSites] = useState([]);
@@ -118,13 +122,15 @@ const Equipment = () => {
             <h1>🖥️ Équipements</h1>
             <p>Gestion des équipements des salles serveurs</p>
           </div>
-          <button className="btn-primary" onClick={() => {
-            setEditEquipment(null);
-            setForm({ name: '', type: 'serveur', room: '', site: '', serialNumber: '', installDate: '', endOfLife: '', notes: '' });
-            setShowModal(true);
-          }}>
-            + Ajouter équipement
-          </button>
+          {canManage && (
+            <button className="btn-primary" onClick={() => {
+              setEditEquipment(null);
+              setForm({ name: '', type: 'serveur', room: '', site: '', serialNumber: '', installDate: '', endOfLife: '', notes: '' });
+              setShowModal(true);
+            }}>
+              + Ajouter équipement
+            </button>
+          )}
         </div>
 
         {/* Alertes EOL */}
@@ -166,9 +172,11 @@ const Equipment = () => {
                   <td>{getEolStatus(eq.endOfLife)}</td>
                   <td>{getStatusBadge(eq.status)}</td>
                   <td>
-                    <button className="btn-edit" onClick={() => handleEdit(eq)}>
-                      ✏️ Modifier
-                    </button>
+                    {canManage && (
+                      <button className="btn-edit" onClick={() => handleEdit(eq)}>
+                        ✏️ Modifier
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

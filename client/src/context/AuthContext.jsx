@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import API from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -11,6 +12,23 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
     }
   }, [token]);
+
+  // Restaurer l'utilisateur au chargement de l'application
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken && !user) {
+      API.get('/auth/me')
+        .then((res) => {
+          setUser(res.data.user);
+          setToken(storedToken);
+        })
+        .catch(() => {
+          // Token invalide, nettoyer
+          localStorage.removeItem('token');
+          setToken(null);
+        });
+    }
+  }, []);
 
   const login = (userData, userToken) => {
     setUser(userData);

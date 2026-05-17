@@ -15,6 +15,8 @@ const sensorsRoutes = require("./routes/sensors.routes");
 const equipmentRoutes = require("./routes/equipment.routes");
 const incidentsRoutes = require("./routes/incidents.routes");
 const eolAlertRoutes = require("./routes/eolAlert.routes");
+const chatbotRoutes = require("./routes/chatbot.route");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 const checkEndOfLife = require("./utils/eolChecker");
 
@@ -45,7 +47,8 @@ app.use("/api/sensors", sensorsRoutes);
 app.use("/api/equipments", equipmentRoutes);
 app.use("/api/incidents", incidentsRoutes);
 app.use("/api/eol-alerts", eolAlertRoutes);
-
+app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.get("/api/run-eol-check", async (req, res) => {
   await checkEndOfLife();
   res.json({ message: "✅ EOL check terminé" });

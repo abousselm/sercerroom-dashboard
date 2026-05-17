@@ -1,0 +1,257 @@
+.waiting-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4faafe 0%, #3b82f6 50%, #1e40af 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: inherit;
+}
+
+.waiting-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  overflow: hidden;
+  animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.waiting-header {
+  background: linear-gradient(135deg, #4faafe 0%, #ff6b35 100%);
+  padding: 30px;
+  text-align: center;
+  color: white;
+}
+
+.leoni-logo {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.logo-text {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: bounceIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-text:nth-child(1) { animation-delay: 0s; }
+.logo-text:nth-child(2) { animation-delay: 0.1s; }
+.logo-text:nth-child(3) { animation-delay: 0.2s; }
+.logo-text:nth-child(4) { animation-delay: 0.3s; }
+.logo-text:nth-child(5) { animation-delay: 0.4s; }
+
+.waiting-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.waiting-content {
+  padding: 40px;
+  text-align: center;
+}
+
+.status-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+
+.waiting-content h2 {
+  color: #1f2937;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+.waiting-message {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+}
+
+.waiting-message p {
+  margin: 8px 0;
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.waiting-message p:first-child {
+  color: #059669;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.status-message {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  font-weight: 500;
+}
+
+.status-message.pending {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+}
+
+.status-message.error {
+  background: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #dc2626;
+}
+
+.waiting-info {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-icon {
+  font-size: 1.2rem;
+  min-width: 24px;
+}
+
+.waiting-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-retry, .btn-login {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+.btn-retry {
+  background: linear-gradient(135deg, #4faafe 0%, #3b82f6 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 170, 254, 0.3);
+}
+
+.btn-retry:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 170, 254, 0.4);
+}
+
+.btn-retry:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-login {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-login:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .waiting-card {
+    margin: 10px;
+  }
+
+  .waiting-header {
+    padding: 20px;
+  }
+
+  .logo-text {
+    font-size: 2rem;
+  }
+
+  .waiting-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .waiting-content {
+    padding: 25px 20px;
+  }
+
+  .waiting-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .waiting-actions {
+    flex-direction: column;
+  }
+
+  .btn-retry, .btn-login {
+    width: 100%;
+  }
+}

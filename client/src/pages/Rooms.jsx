@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
 import './Users.css';
 
 const Rooms = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.isSuperAdmin;
+  const isResponsableSite = user?.role === 'responsable_site';
+  const canManageRoom = isAdmin || isResponsableSite;
+
   const [rooms, setRooms] = useState([]);
   const [sites, setSites] = useState([]);
   const [users, setUsers] = useState([]);
@@ -19,18 +25,27 @@ const Rooms = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-      const [roomsRes, sitesRes, usersRes] = await Promise.all([
+      const [roomsRes, sitesRes] = await Promise.all([
         API.get('/rooms'),
-        API.get('/sites'),
-        API.get('/users')
+        API.get('/sites')
       ]);
       setRooms(roomsRes.data);
       setSites(sitesRes.data);
-      setUsers(usersRes.data);
+
+      if (canManageRoom) {
+        try {
+          const usersRes = await API.get('/users');
+          setUsers(usersRes.data);
+        } catch (err) {
+          toast.error('Erreur chargement utilisateurs');
+        }
+      }
     } catch (error) {
       toast.error('Erreur chargement données');
     } finally {
@@ -97,14 +112,16 @@ const Rooms = () => {
     return selectedRoom?.authorizedUsers?.some(u => u._id === userId);
   };
 
-  if (loading) return (
-    <div className="layout">
-      <Sidebar />
-      <div className="main-content">
-        <div className="loading">Chargement...</div>
+  if (loading) {
+    return (
+      <div className="layout">
+        <Sidebar />
+        <div className="main-content">
+          <div className="loading">Chargement...</div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="layout">
@@ -115,13 +132,15 @@ const Rooms = () => {
             <h1>🚪 Salles Serveurs</h1>
             <p>Gestion des salles et des accès</p>
           </div>
-          <button className="btn-primary" onClick={() => {
-            setEditRoom(null);
-            setForm({ name: '', site: '', esp32Id: '' });
-            setShowModal(true);
-          }}>
-            + Ajouter salle
-          </button>
+          {isAdmin && (
+            <button className="btn-primary" onClick={() => {
+              setEditRoom(null);
+              setForm({ name: '', site: '', esp32Id: '' });
+              setShowModal(true);
+            }}>
+              + Ajouter salle
+            </button>
+          )}
         </div>
 
         <div className="table-card">
@@ -153,15 +172,19 @@ const Rooms = () => {
                     </span>
                   </td>
                   <td>
-                    <button className="btn-edit" onClick={() => handleEdit(room)}>
-                      ✏️ Modifier
-                    </button>
-                    <button className="btn-success" onClick={() => {
-                      setSelectedRoom(room);
-                      setShowUsersModal(true);
-                    }}>
-                      👤 Accès
-                    </button>
+                    {isAdmin && (
+                      <button className="btn-edit" onClick={() => handleEdit(room)}>
+                        ✏️ Modifier
+                      </button>
+                    )}
+                    {canManageRoom && (
+                      <button className="btn-success" onClick={() => {
+                        setSelectedRoom(room);
+                        setShowUsersModal(true);
+                      }}>
+                        👤 Accès
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -232,19 +255,19 @@ const Rooms = () => {
                 <button onClick={() => setShowUsersModal(false)}>✕</button>
               </div>
               <div className="users-access-list">
-                {users.map((user) => (
-                  <div key={user._id} className="user-access-item">
+                {users.map((u) => (
+                  <div key={u._id} className="user-access-item">
                     <div>
-                      <strong>{user.name}</strong>
-                      <span className="text-muted"> — {user.role}</span>
-                      {user.rfidCard && <span className="badge badge-blue"> 🔑 {user.rfidCard}</span>}
+                      <strong>{u.name}</strong>
+                      <span className="text-muted"> — {u.role}</span>
+                      {u.rfidCard && <span className="badge badge-blue"> 🔑 {u.rfidCard}</span>}
                     </div>
-                    {isAuthorized(user._id) ? (
-                      <button className="btn-danger" onClick={() => handleRemoveUser(user._id)}>
+                    {isAuthorized(u._id) ? (
+                      <button className="btn-danger" onClick={() => handleRemoveUser(u._id)}>
                         ❌ Retirer
                       </button>
                     ) : (
-                      <button className="btn-success" onClick={() => handleAddUser(user._id)}>
+                      <button className="btn-success" onClick={() => handleAddUser(u._id)}>
                         ✅ Autoriser
                       </button>
                     )}
@@ -266,3 +289,4 @@ const Rooms = () => {
 };
 
 export default Rooms;
+

@@ -3,7 +3,23 @@ const Incident = require('../models/Incident');
 // ✅ Lister tous les incidents
 exports.getAllIncidents = async (req, res) => {
   try {
-    const incidents = await Incident.find()
+    let query = {};
+
+    // Si l'utilisateur est responsable de site ou technicien, filtrer par son site
+    if (req.user.role === 'responsable_site' || req.user.role === 'technicien') {
+      const user = await require('../models/User').findById(req.user.id).populate('site');
+      if (user && user.site) {
+        // Trouver toutes les salles du site de l'utilisateur
+        const Room = require('../models/Room');
+        const rooms = await Room.find({ site: user.site._id });
+        const roomIds = rooms.map(room => room._id);
+        query.room = { $in: roomIds };
+      } else {
+        return res.status(403).json({ message: '❌ Aucun site assigné à votre compte' });
+      }
+    }
+
+    const incidents = await Incident.find(query)
       .populate('room')
       .sort({ createdAt: -1 });
     res.status(200).json(incidents);

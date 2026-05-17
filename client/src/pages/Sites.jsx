@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
 import './Users.css';
 
 const Sites = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.isSuperAdmin;
+
   const [sites, setSites] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,18 +20,25 @@ const Sites = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-      const [sitesRes, usersRes] = await Promise.all([
-        API.get('/sites'),
-        API.get('/users')
-      ]);
+      const sitesRes = await API.get('/sites');
       setSites(sitesRes.data);
-      setUsers(usersRes.data.filter(u => u.role === 'responsable_site'));
+
+      if (isAdmin) {
+        try {
+          const usersRes = await API.get('/users');
+          setUsers(usersRes.data.filter(u => u.role === 'responsable_site'));
+        } catch (err) {
+          toast.error('Erreur chargement utilisateurs');
+        }
+      }
     } catch (error) {
-      toast.error('Erreur chargement données');
+      toast.error('Erreur chargement sites');
     } finally {
       setLoading(false);
     }
@@ -72,14 +83,16 @@ const Sites = () => {
     }
   };
 
-  if (loading) return (
-    <div className="layout">
-      <Sidebar />
-      <div className="main-content">
-        <div className="loading">Chargement...</div>
+  if (loading) {
+    return (
+      <div className="layout">
+        <Sidebar />
+        <div className="main-content">
+          <div className="loading">Chargement...</div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="layout">
@@ -90,13 +103,18 @@ const Sites = () => {
             <h1>🏢 Sites</h1>
             <p>Gestion des sites de l'entreprise</p>
           </div>
-          <button className="btn-primary" onClick={() => {
-            setEditSite(null);
-            setForm({ name: '', location: '', responsable: '' });
-            setShowModal(true);
-          }}>
-            + Ajouter site
-          </button>
+          {isAdmin && (
+            <button
+              className="btn-primary"
+              onClick={() => {
+                setEditSite(null);
+                setForm({ name: '', location: '', responsable: '' });
+                setShowModal(true);
+              }}
+            >
+              + Ajouter site
+            </button>
+          )}
         </div>
 
         <div className="table-card">
@@ -116,7 +134,9 @@ const Sites = () => {
                 <tr key={site._id}>
                   <td><strong>{site.name}</strong></td>
                   <td>📍 {site.location}</td>
-                  <td>{site.responsable ? site.responsable.name : <span className="text-muted">Non assigné</span>}</td>
+                  <td>
+                    {site.responsable ? site.responsable.name : <span className="text-muted">Non assigné</span>}
+                  </td>
                   <td>
                     <span className={site.isActive ? 'badge badge-green' : 'badge badge-red'}>
                       {site.isActive ? '✅ Actif' : '❌ Inactif'}
@@ -124,13 +144,19 @@ const Sites = () => {
                   </td>
                   <td>{new Date(site.createdAt).toLocaleDateString()}</td>
                   <td>
-                    <button className="btn-edit" onClick={() => handleEdit(site)}>✏️ Modifier</button>
-                    <button
-                      className={site.isActive ? 'btn-danger' : 'btn-success'}
-                      onClick={() => handleToggleActive(site)}
-                    >
-                      {site.isActive ? '🔒 Désactiver' : '🔓 Activer'}
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button className="btn-edit" onClick={() => handleEdit(site)}>
+                          ✏️ Modifier
+                        </button>
+                        <button
+                          className={site.isActive ? 'btn-danger' : 'btn-success'}
+                          onClick={() => handleToggleActive(site)}
+                        >
+                          {site.isActive ? '🔒 Désactiver' : '🔓 Activer'}
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -167,18 +193,22 @@ const Sites = () => {
                     required
                   />
                 </div>
-                <div className="form-group">
-                  <label>Responsable (optionnel)</label>
-                  <select
-                    value={form.responsable}
-                    onChange={(e) => setForm({ ...form, responsable: e.target.value })}
-                  >
-                    <option value="">-- Aucun responsable --</option>
-                    {users.map(u => (
-                      <option key={u._id} value={u._id}>{u.name}</option>
-                    ))}
-                  </select>
-                </div>
+                {isAdmin && (
+                  <div className="form-group">
+                    <label>Responsable (optionnel)</label>
+                    <select
+                      value={form.responsable}
+                      onChange={(e) => setForm({ ...form, responsable: e.target.value })}
+                    >
+                      <option value="">-- Aucun responsable --</option>
+                      {users.map((u) => (
+                        <option key={u._id} value={u._id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="modal-footer">
                   <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
                     Annuler
@@ -197,3 +227,4 @@ const Sites = () => {
 };
 
 export default Sites;
+

@@ -73,6 +73,11 @@ router.post('/message', authMiddleware, async (req, res) => {
 
     const systemPrompt = await getUserContext(req.user.id, req.user.role);
 
+    const groqApiKey = process.env.GROQ_API_KEY;
+    if (!groqApiKey) {
+      return res.status(500).json({ message: 'GROQ_API_KEY manquant. Ajoutez la clé dans le fichier .env et redémarrez le serveur.' });
+    }
+
     const messages = [
       ...(history || []).slice(-6),
       { role: 'user', content: message }
@@ -82,7 +87,7 @@ router.post('/message', authMiddleware, async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+        'Authorization': `Bearer ${groqApiKey}`
       },
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',

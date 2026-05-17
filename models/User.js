@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  phone: { type: String, default: null },
   password: { type: String, required: true },
   role: { 
     type: String, 
@@ -10,8 +11,10 @@ const userSchema = new mongoose.Schema({
     default: 'technicien' 
   },
   site: { type: mongoose.Schema.Types.ObjectId, ref: 'Site', default: null },
-  rfidCard: { type: String, default: null }, // carte RFID associée
-  isActive: { type: Boolean, default: true }
+  rfidCard: { type: String, default: null },
+  isActive: { type: Boolean, default: true },
+  isSuperAdmin: { type: Boolean, default: false },
+  approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

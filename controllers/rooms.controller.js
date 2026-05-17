@@ -4,7 +4,19 @@ const Site = require('../models/Site');
 // ✅ Lister toutes les salles
 exports.getAllRooms = async (req, res) => {
   try {
-    const rooms = await Room.find()
+    let query = {};
+
+    // Si l'utilisateur est responsable de site ou technicien, filtrer par son site
+    if (req.user.role === 'responsable_site' || req.user.role === 'technicien') {
+      const user = await require('../models/User').findById(req.user.id).populate('site');
+      if (user && user.site) {
+        query.site = user.site._id;
+      } else {
+        return res.status(403).json({ message: '❌ Aucun site assigné à votre compte' });
+      }
+    }
+
+    const rooms = await Room.find(query)
       .populate('site')
       .populate('authorizedUsers', '-password');
     res.status(200).json(rooms);

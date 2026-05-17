@@ -16,6 +16,6 @@ router.get('/:id', sitesController.getSiteById);
 router.post('/', roleMiddleware('admin'), sitesController.createSite);
 
 // PUT /api/sites/:id
-router.put('/:id', roleMiddleware('admin'), sitesController.updateSite);
+router.put('/:id', roleMiddleware('admin', 'responsable_site'), sitesController.updateSite);
 
 module.exports = router;

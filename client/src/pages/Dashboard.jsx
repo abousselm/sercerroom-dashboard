@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import API from '../api/axios';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.isSuperAdmin;
+
   const [stats, setStats] = useState({
     users: 0,
     sites: 0,
@@ -13,36 +17,50 @@ const Dashboard = () => {
     eolAlerts: 0
   });
   const [recentAccess, setRecentAccess] = useState([]);
-  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      const [users, sites, rooms, incidents, equipments, eolAlerts, access] = await Promise.all([
-        API.get('/users'),
+      const promises = [
         API.get('/sites'),
         API.get('/rooms'),
         API.get('/incidents/stats'),
         API.get('/equipments'),
         API.get('/eol-alerts/unresolved'),
         API.get('/access')
-      ]);
+      ];
+
+      // Ne charger /users que pour les admins
+      if (isAdmin) {
+        promises.push(API.get('/users'));
+      }
+
+      const results = await Promise.all(promises);
+
+      let idx = 0;
+      const sitesRes = results[idx++];
+      const roomsRes = results[idx++];
+      const incidentsRes = results[idx++];
+      const equipmentsRes = results[idx++];
+      const eolAlertsRes = results[idx++];
+      const accessRes = results[idx++];
+      const usersRes = isAdmin ? results[idx++] : { data: [] };
 
       setStats({
-        users: users.data.length,
-        sites: sites.data.length,
-        rooms: rooms.data.length,
-        incidents: incidents.data.unresolved,
-        equipments: equipments.data.length,
-        eolAlerts: eolAlerts.data.length
+        users: usersRes.data.length || 0,
+        sites: sitesRes.data.length || 0,
+        rooms: roomsRes.data.length || 0,
+        incidents: incidentsRes.data.unresolved || 0,
+        equipments: equipmentsRes.data.length || 0,
+        eolAlerts: eolAlertsRes.data.length || 0
       });
 
-      setRecentAccess(access.data.slice(0, 5));
-     
+      setRecentAccess(accessRes.data.slice(0, 5));
 
     } catch (error) {
       console.error('Erreur dashboard :', error);
@@ -71,13 +89,15 @@ const Dashboard = () => {
 
         {/* Stats Cards */}
         <div className="stats-grid">
-          <div className="stat-card blue">
-            <div className="stat-icon">👤</div>
-            <div className="stat-info">
-              <h3>{stats.users}</h3>
-              <p>Utilisateurs</p>
+          {isAdmin && (
+            <div className="stat-card blue">
+              <div className="stat-icon">👤</div>
+              <div className="stat-info">
+                <h3>{stats.users}</h3>
+                <p>Utilisateurs</p>
+              </div>
             </div>
-          </div>
+          )}
           <div className="stat-card green">
             <div className="stat-icon">🏢</div>
             <div className="stat-info">
@@ -152,3 +172,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
