@@ -6,13 +6,13 @@ import './Login.css';
 
 const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
-  
+
   // Auth states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // Signup states
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
@@ -22,7 +22,7 @@ const Login = () => {
   const [signupConfirm, setSignupConfirm] = useState('');
   const [signupError, setSignupError] = useState('');
   const [signupLoading, setSignupLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -36,15 +36,19 @@ const Login = () => {
       navigate('/dashboard');
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Erreur de connexion';
-      
+
       // Si le compte est en attente d'approbation, rediriger vers la page d'attente
-      if (errorMessage.includes('attente') || errorMessage.includes('pending') || err.response?.status === 403) {
+      if (
+        errorMessage.includes('attente') ||
+        errorMessage.includes('pending') ||
+        err.response?.status === 403
+      ) {
         localStorage.setItem('pendingEmail', email);
         localStorage.setItem('pendingPassword', password);
         navigate('/waiting-approval');
         return;
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -63,7 +67,7 @@ const Login = () => {
     setSignupLoading(true);
     try {
       const backendRole = signupRole === 'responsable-site' ? 'responsable_site' : signupRole;
-      const res = await API.post('/auth/register', {
+      await API.post('/auth/register', {
         name: signupName,
         email: signupEmail,
         phone: signupPhone,
@@ -75,17 +79,16 @@ const Login = () => {
       localStorage.setItem('pendingEmail', signupEmail);
       localStorage.setItem('pendingPassword', signupPassword);
 
-      // Rediriger vers la page d'attente
       navigate('/waiting-approval');
     } catch (err) {
-      setSignupError(err.response?.data?.message || 'Erreur lors de l\'inscription');
+      setSignupError(err.response?.data?.message || "Erreur lors de l\'inscription");
     } finally {
       setSignupLoading(false);
     }
   };
 
   const toggleForm = () => {
-    setIsSignup(!isSignup);
+    setIsSignup((prev) => !prev);
     setError('');
     setSignupError('');
   };
@@ -100,13 +103,13 @@ const Login = () => {
         </div>
 
         <div className="form-toggle">
-          <button 
+          <button
             className={`toggle-btn ${!isSignup ? 'active' : ''}`}
             onClick={toggleForm}
           >
             Connexion
           </button>
-          <button 
+          <button
             className={`toggle-btn ${isSignup ? 'active' : ''}`}
             onClick={toggleForm}
           >
@@ -218,7 +221,7 @@ const Login = () => {
                 />
               </div>
               <button type="submit" className="submit-btn" disabled={signupLoading}>
-                {signupLoading ? 'Inscription...' : 'S\'inscrire'}
+                {signupLoading ? 'Inscription...' : "S\'inscrire"}
               </button>
             </form>
           </div>
@@ -229,3 +232,4 @@ const Login = () => {
 };
 
 export default Login;
+
