@@ -114,7 +114,7 @@ const Login = () => {
           </button>
         </div>
 
-        <div className="forms-container">
+        <div className={`forms-container ${isSignup ? 'register-mode' : ''}`}>
           {/* Login Form */}
           <div className={`form-frame login-frame ${!isSignup ? 'active' : ''}`}>
             <div className="login-header">
